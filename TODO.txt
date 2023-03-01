@@ -1,0 +1,2 @@
+Rifare grafi con colori diversi dopo aver scelto quali mostrare nella presentazione
+terminare analisi py nx
