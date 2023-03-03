@@ -266,41 +266,72 @@ def inverse_community_mapping(partition):
         internal_degrees[c] = 0
     return partition_mapping, internal_degrees
 
-def compute_k_core_decomposition_ciao(graph):
+def compute_k_core_decomposition(graph):
     graph.remove_edges_from(nx.selfloop_edges(graph)) 
     core_numbers = nx.algorithms.core.core_number(graph)
     print(len(inverse_community_mapping(core_numbers)[0][2]))
     kcoredf = pd.DataFrame({"Id":core_numbers.keys(), "kShellId":core_numbers.values()})
     kcoredf.to_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/Politican_Blogs_kcoreDecomposition.csv", index=False)
-    
-def compute_k_core_decomposition(graph):
+
+def kcore(graph):
     # remove self-loops
     graph.remove_edges_from(nx.selfloop_edges(graph)) 
-    
-    # compute k-core decomposition
-    core_numbers = nx.algorithms.core.core_number(graph)
-    
-    # sort nodes by their core numbers in descending order
-    nodes = sorted(core_numbers, key=core_numbers.get, reverse=True)
-    
-    # compute the layout positions using Kamada-Kawai algorithm
-    pos = nx.kamada_kawai_layout(graph)
-    
-    # set the radius of the circle
-    radius = 1
-    
-    # compute the angle between each node on the circle
-    angle = 2 * np.pi / len(nodes)
+    # Calcola il grado di core per ogni nodo
+    coreness = nx.core_number(graph)
+    # Trova il massimo grado di core tra tutti i nodi
+    max_coreness = max(coreness.values())
+    # Il numero di shells corrisponde al massimo grado di core trovato
+    num_shells = max_coreness + 1
 
-    # draw the nodes and edges
-    for i, node in enumerate(nodes):
-        x = radius * np.cos(i * angle)
-        y = radius * np.sin(i * angle)
-        nx.draw_networkx_nodes(graph, pos={node: [x, y]}, nodelist=[node], node_size=200, node_color='b')
-        nx.draw_networkx_edges(graph, pos, edgelist=graph.out_edges(node), alpha=0.5)
+    return num_shells
 
-    # show the plot
-    plt.axis('off')
+def drawCoreDecomposition(graph):
+    # Load the data from the csv file
+    df = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/Politican_Blogs_kcoreDecomposition.csv")
+    # Define the number of shells (43 in your case)
+    num_shells = kcore(graph)
+
+    # Define the radius of the smallest and largest circles
+    min_radius = 0.1
+    max_radius = 0.5
+
+    # Create the figure and the axis
+    fig, ax = plt.subplots(figsize = (8, 8))
+    cmap = plt.cm.get_cmap('coolwarm')
+    norm = plt.Normalize(df['kShellId'].min(), df['kShellId'].max())
+    # Create the circles for each k-shell id
+    for i in range(num_shells):
+        radius = min_radius + i * (max_radius - min_radius) / num_shells
+        circle = plt.Circle((0, 0), radius, fill=False)
+        ax.add_artist(circle)
+
+    # Draw the nodes on the corresponding circle
+    for i, row in df.iterrows():
+        x = 0
+        y = 0
+        k_shell_id = row["kShellId"]
+        radius = max_radius - k_shell_id * (max_radius - min_radius) / num_shells  # invert the order of calculation
+        theta = i * (2 * 3.14159) / len(df)
+        x = radius * np.cos(theta)
+        y = radius * np.sin(theta)
+        # Map the k-shell id to a color using the colormap
+        color = cmap(k_shell_id / num_shells)
+        ax.scatter(x, y, color=color, s=8)
+
+
+    # Set the axis limits and turn off the axis labels
+    ax.set_xlim(-max_radius, max_radius)
+    ax.set_ylim(-max_radius, max_radius)
+    ax.axis("off")
+
+    # Add the color legend
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, orientation='horizontal')
+    cbar.set_label('K-shell ID')
+    # Adjust the spacing between the subplots to avoid node overlapping
+    plt.subplots_adjust(wspace=20.0, hspace=20.0)
+    # Show the plot
     plt.show()
 
 def compute_infomap(graph):
@@ -320,110 +351,11 @@ def compute_infomap(graph):
             communities[community].append(node_id)
     print(communities)
 
-def kcore(graph, nodes = None):
-    # remove self-loops
-    graph.remove_edges_from(nx.selfloop_edges(graph)) 
-    core_numbers = {}
-    for node in graph.nodes():
-        neighbors = set(graph.predecessors(node)) | set(graph.successors(node))
-        if len(neighbors) == 0:
-            core_numbers[node] = 0
-        else:
-            neighbor_cores = [core_numbers[n] for n in neighbors]
-            neighbor_cores.append(graph.in_degree(node, weight='weight') + graph.out_degree(node, weight='weight'))
-            core_numbers[node] = min(neighbor_cores)
-    return core_numbers
-    '''
-    # perform k-core decomposition
-    k_cores = nx.algorithms.core.k_core(graph, k=2)
-
-    # perform k-shell decomposition
-    k_shells = nx.algorithms.core.k_shell(graph)
-
-    # print nodes in each k-core
-    for k in sorted(k_cores.keys()):
-        print(f"k-core {k}: {list(k_cores[k])}")
-
-    # print nodes in each k-shell
-    for k in sorted(k_shells.keys()):
-        print(f"k-shell {k}: {list(k_shells[k])}")
-    '''
-
 def main():
-    #edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
-    #graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
+    edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
+    graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
     #compute_infomap(graph)
-    #kcore(graph)
-
-    # Load the data from the csv file
-    df = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/Politican_Blogs_kcoreDecomposition.csv")
-    # Define the number of shells (43 in your case)
-    num_shells = 43
-
-    # Define the radius of the smallest and largest circles
-    min_radius = 0.1
-    max_radius = 0.5
-
-    # Create the figure and the axis
-    fig, ax = plt.subplots()
-
-    # Create the circles for each k-shell id
-    for i in range(num_shells):
-        radius = min_radius + i * (max_radius - min_radius) / num_shells
-        circle = plt.Circle((0, 0), radius, fill=False)
-        ax.add_artist(circle)
-
-    # Draw the nodes on the corresponding circle
-    for i, row in df.iterrows():
-        x = 0
-        y = 0
-        k_shell_id = row["kShellId"]
-        radius = min_radius + k_shell_id * (max_radius - min_radius) / num_shells
-        theta = i * (2 * 3.14159) / len(df)
-        x = radius * np.cos(theta)
-        y = radius * np.sin(theta)
-        ax.scatter(x, y, color="red", s=5)
-
-    # Set the axis limits and turn off the axis labels
-    ax.set_xlim(-max_radius, max_radius)
-    ax.set_ylim(-max_radius, max_radius)
-    ax.axis("off")
-
-    # Show the plot
-    plt.show()
-
-    '''
-    # Leggi i dati dal file CSV
-    with open('C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv', 'r') as f:
-        reader = csv.reader(f, delimiter=";")
-        # Skip the header row if it exists
-        if csv.Sniffer().has_header(f.read(1024)):
-            next(reader)
-        # Create a directed graph from the CSV data
-        graph = nx.DiGraph()
-        for row in reader:
-            # Add an edge to the graph for each row in the CSV file
-            graph.add_edge(int(row[0]), int(row[1]))
-    graph.remove_edges_from(nx.selfloop_edges(graph))
-    # Save the graph as a file
-    nx.write_graphml(graph, 'C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/graph.graphml')
-
-    K = nt.graphio.readGraph("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/graph.graphml", nt.Format.GraphML)
-    coreDec = nt.centrality.CoreDecomposition(K)
-    coreDec.run()
-    scores = coreDec.scores()
-    min_score = min(scores)
-    max_score = max(scores)
-    cmap = cm.ScalarMappable(norm=colors.Normalize(vmin=min_score, vmax=max_score), cmap=cm.jet)
-
-    plt.figure(figsize=(10, 10))
-    nt.viztasks.drawGraph(K, node_size=20, node_color=[cmap.to_rgba(score) for score in scores])
-    plt.show()
-    '''
-
-
-
-
+    drawCoreDecomposition(graph)
     '''
     with open('C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv', 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=";")
@@ -451,7 +383,6 @@ def main():
         #kcore(graph)
         #compute_k_core_decomposition(graph)
         compute_infomap(graph)
-        
 
         page_rank = pageRank(graph) #top 5 nodes
         degree_centrality = degreeCentrality(graph) #top 5 nodes
