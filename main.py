@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import powerlaw
 import infomap
 
-from igraph import *
+from igraph import Graph
 import networkit as nt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
@@ -351,11 +351,23 @@ def compute_infomap(graph):
             communities[community].append(node_id)
     print(communities)
 
+def linkPrediction(graph):
+    # crea un grafo diretto in igraph
+    g = Graph.TupleList(graph.itertuples(index=False), directed=True)
+    # calcola il punteggio di preferential attachment per tutte le coppie di vertici
+    pa_scores = [(i, j, g.degree(i) * g.degree(j)) for i in range(g.vcount()) for j in range(g.vcount()) if i != j]
+    # seleziona solo i 10 punteggi migliori
+    top_10 = sorted(pa_scores, key=lambda x: x[2], reverse=True)[:10]
+    # stampa i 10 punteggi migliori
+    for u, v, score in top_10:
+        print("({}, {}) -> {}".format(u, v, score))
+    
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
     #compute_infomap(graph)
-    drawCoreDecomposition(graph)
+    #drawCoreDecomposition(graph)
+    linkPrediction(edges)
     '''
     with open('C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv', 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=";")
