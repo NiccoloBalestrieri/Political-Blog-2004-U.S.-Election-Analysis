@@ -5,13 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import powerlaw
 import infomap
-
+import random
 from igraph import Graph
+from networkx.algorithms.efficiency_measures import global_efficiency
+
 import networkit as nt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 
-from pathlib import Path
 from collections import Counter
 from networkx.algorithms.distance_measures import diameter
 
@@ -97,13 +98,10 @@ with open('C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/dataset/edge_list_with_
 
 def components(graph):
     scc = max(nx.strongly_connected_components(graph), key=len)
-    print("Dimension of the largest strongly connected component: " + str(len(scc)))
     wcc = max(nx.weakly_connected_components(graph), key=len)
-    print("Dimension of the largest weakly connected component: " + str(len(wcc)))
     n_scc = nx.number_strongly_connected_components(graph)
-    print("Number of all the strongly connected components: " + str(n_scc))
     n_wcc = nx.number_weakly_connected_components(graph)
-    print("Number of all the weakly connected components:" + str(n_wcc))
+    return scc, wcc, n_scc, n_wcc
 
 def degreeCentrality(graph):
     degree = nx.degree_centrality(graph)
@@ -162,9 +160,8 @@ def plotInDegreeDistribution(graph):
     plt.title("In-Degree distribution")
     plt.xlabel("k")
     plt.ylabel("P_in(k)")
-    plt.plot(deg, cnt)
+    plt.plot(deg, cnt, label="In Degree Distribution")
     plt.show()
-    plt.title("In-Degree cumulated distribution")
 
 def plotOutDegreeDistribution(graph):
     degree_sequence = sorted([d for n, d in graph.out_degree()], reverse=True)
@@ -290,11 +287,9 @@ def drawCoreDecomposition(graph):
     df = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/Politican_Blogs_kcoreDecomposition.csv")
     # Define the number of shells (43 in your case)
     num_shells = kcore(graph)
-
     # Define the radius of the smallest and largest circles
     min_radius = 0.1
     max_radius = 0.5
-
     # Create the figure and the axis
     fig, ax = plt.subplots(figsize = (8, 8))
     cmap = plt.cm.get_cmap('coolwarm')
@@ -304,7 +299,6 @@ def drawCoreDecomposition(graph):
         radius = min_radius + i * (max_radius - min_radius) / num_shells
         circle = plt.Circle((0, 0), radius, fill=False)
         ax.add_artist(circle)
-
     # Draw the nodes on the corresponding circle
     for i, row in df.iterrows():
         x = 0
@@ -318,12 +312,10 @@ def drawCoreDecomposition(graph):
         color = cmap(k_shell_id / num_shells)
         ax.scatter(x, y, color=color, s=8)
 
-
     # Set the axis limits and turn off the axis labels
     ax.set_xlim(-max_radius, max_radius)
     ax.set_ylim(-max_radius, max_radius)
     ax.axis("off")
-
     # Add the color legend
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])
@@ -361,62 +353,156 @@ def linkPrediction(graph):
     # stampa i 10 punteggi migliori
     for u, v, score in top_10:
         print("({}, {}) -> {}".format(u, v, score))
-    
+
+def failures(graph):
+    num_nodes_to_remove = len(graph.nodes())
+    x_values = []
+    y_values = []
+    for i in range(num_nodes_to_remove):
+        graph.remove_node(random.choice(list(graph.nodes())))
+        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
+        x_values.append(i+1)
+        y_values.append(len(scc))
+    plt.plot(x_values, y_values, label='Random failure')
+    plt.xlabel('Number of nodes removed')
+    plt.ylabel('Size of largest strongly connected component')
+    plt.legend()
+    plt.show()
+
+def attackOutDegree(graph):
+    out_degree = nx.out_degree_centrality(graph)
+    sorted_out_degree = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
+    num_nodes_to_remove = int(len(sorted_out_degree))
+
+    x_values = []
+    y_values = []
+
+    for i in range(num_nodes_to_remove):
+        nodes_to_remove = [n[0] for n in sorted_out_degree[:i+1]]
+        graph.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
+        x_values.append(i+1)
+        y_values.append(len(scc))
+
+    print("New dimension of the largest strongly connected component (attack on out degree): " + str(len(scc)))
+    plt.plot(x_values, y_values, label='Out degree attack')
+    plt.xlabel('Number of nodes removed')
+    plt.ylabel('Size of largest strongly connected component')
+    plt.legend()
+    plt.show()
+
+def attackInDegree(graph):
+    in_degree = nx.in_degree_centrality(graph)
+    sorted_in_degree = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
+    num_nodes_to_remove = int(len(sorted_in_degree))
+
+    x_values = []
+    y_values = []
+
+    for i in range(num_nodes_to_remove):
+        nodes_to_remove = [n[0] for n in sorted_in_degree[:i+1]]
+        graph.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
+        x_values.append(i+1)
+        y_values.append(len(scc))
+
+    print("New dimension of the largest strongly connected component (attack on in degree): " + str(len(scc)))
+    plt.plot(x_values, y_values, label='In degree attack')
+    plt.xlabel('Number of nodes removed')
+    plt.ylabel('Size of largest strongly connected component')
+    plt.legend()
+    plt.show()
+
+def attackPageRank(graph):
+    pagerank = nx.pagerank(graph)
+    sorted_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)
+    num_nodes_to_remove = int(len(sorted_pagerank))
+
+    x_values = []
+    y_values = []
+
+    for i in range(num_nodes_to_remove):
+        nodes_to_remove = [n[0] for n in sorted_pagerank[:i+1]]
+        graph.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
+        x_values.append(i+1)
+        y_values.append(len(scc))
+
+    print("New dimension of the largest strongly connected component (attack on PageRank): " + str(len(scc)))
+    plt.plot(x_values, y_values, label='PageRank attack')
+    plt.xlabel('Number of nodes removed')
+    plt.ylabel('Size of largest strongly connected component')
+    plt.legend()
+    plt.show()
+
+def efficienyGlobal(graph):
+    eff = global_efficiency(graph)
+    print("Efficienza globale: ", eff)
+    return eff
+
+def autHub(graph):
+    # calcolo delle centralità di hub e di autorità
+    hubs, authorities = nx.hits(graph)
+    # stampa dei primi 5 nodi con la centralità di hub più alta
+    top_hubs = sorted(hubs.items(), key=lambda x: x[1], reverse=True)[:5]
+    print("Top 5 nodi per centralità di hub:")
+    for node, centrality in top_hubs:
+        print(node, centrality)
+    # stampa dei primi 5 nodi con la centralità di autorità più alta
+    top_authorities = sorted(authorities.items(), key=lambda x: x[1], reverse=True)[:5]
+    print("Top 5 nodi per centralità di autorità:")
+    for node, centrality in top_authorities:
+        print(node, centrality)
+
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
+
+    communities = defineCommunities(graph)
+    mod = modularity(graph, communities)
+    scc, wcc, n_scc, n_wcc = components(graph)
+    InScaleFree(graph) #da rivedere
+    OutScaleFree(graph) #da rivedere
+    plotInDegreeDistribution(graph)
+    plotOutDegreeDistribution(graph)
+    plotInDegreeCumulativeDistribution(graph)
+    plotOutDegreeCumulativeDistribution(graph)
+    drawUncorrelatedNetwroks(graph) #da rivedere
+    attackOutDegree(graph.copy())
+    attackInDegree(graph.copy())
+    attackPageRank(graph.copy())
+    failures(graph.copy())
     #compute_infomap(graph)
-    #drawCoreDecomposition(graph)
+    drawCoreDecomposition(graph)
     linkPrediction(edges)
-    '''
-    with open('C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv', 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=";")
-        edges = []
-        next(reader)
-        for row in reader:
-            edges.append((row[0], row[1]))
-        graph = nx.DiGraph()
-        graph.add_edges_from(edges)
+    #efficienyGlobal(graph)
+    autHub(graph)
 
-        # Definisci le comunità
-        #communities = defineCommunities(graph)
+    page_rank = pageRank(graph) #top 5 nodes
+    degree_centrality = degreeCentrality(graph) #top 5 nodes
+    betweenness_centrality = betweennessCentrality(graph) #top 5 nodes
+    out_degree = outDegreeCentrality(graph) #top 5 nodes
+    in_degree = inDegreeCentrality(graph) #top 5 nodes
+    closeness_centrality = closenessCentrality(graph) #top 5 nodes
+    degree_centrality_str = ", ".join([str(node) for node in degree_centrality])
+    out_degree_str = ", ".join([str(node) for node in out_degree])
+    in_degree_str = ", ".join([str(node) for node in in_degree])
+    betweenness_centrality_str = ", ".join([str(node) for node in betweenness_centrality])
+    closeness_centrality_str = ", ".join([str(node) for node in closeness_centrality])
+    assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
 
-        # Calcola la modularità
-        #mod = modularity(graph, communities)
+    print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
+    print("Top 5 nodes degree centrality: " + degree_centrality_str)
+    print("Top 5 nodes out degree: " + out_degree_str)
+    print("Top 5 nodes in degree: " + in_degree_str)
+    print("Top 5 nodes betweenness centrality: " + betweenness_centrality_str)
+    print("Top 5 nodes closeness centrality: " + closeness_centrality_str)
+    #print(page_rank.values()) #capire perchè non va e perchè l'ho fatto
+    print("Communities:", communities)
+    print("Modularity:", mod)
+    print("Dimension of the largest strongly connected component: " + str(len(scc)))
+    print("Dimension of the largest weakly connected component: " + str(len(wcc)))
+    print("Number of all the strongly connected components: " + str(n_scc))
+    print("Number of all the weakly connected components:" + str(n_wcc))
 
-        components(graph)
-        #InScaleFree(graph)
-        #OutScaleFree(graph)
-        #plotInDegreeDistribution(graph)
-        #plotOutDegreeDistribution(graph)
-        #plotInDegreeCumulativeDistribution(graph)
-        #plotOutDegreeCumulativeDistribution(graph)
-        #drawUncorrelatedNetwroks(graph)
-        #kcore(graph)
-        #compute_k_core_decomposition(graph)
-        compute_infomap(graph)
-
-        page_rank = pageRank(graph) #top 5 nodes
-        degree_centrality = degreeCentrality(graph) #top 5 nodes
-        betweenness_centrality = betweennessCentrality(graph) #top 5 nodes
-        out_degree = outDegreeCentrality(graph) #top 5 nodes
-        in_degree = inDegreeCentrality(graph) #top 5 nodes
-        closeness_centrality = closenessCentrality(graph) #top 5 nodes
-        degree_centrality_str = ", ".join([str(node) for node in degree_centrality])
-        out_degree_str = ", ".join([str(node) for node in out_degree])
-        in_degree_str = ", ".join([str(node) for node in in_degree])
-        betweenness_centrality_str = ", ".join([str(node) for node in betweenness_centrality])
-        closeness_centrality_str = ", ".join([str(node) for node in closeness_centrality])
-        assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
-
-        print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
-        print("Top 5 nodes degree centrality: " + degree_centrality_str)
-        print("Top 5 nodes out degree: " + out_degree_str)
-        print("Top 5 nodes in degree: " + in_degree_str)
-        print("Top 5 nodes betweenness centrality: " + betweenness_centrality_str)
-        print("Top 5 nodes closeness centrality: " + closeness_centrality_str)
-        #print(page_rank.values())
-        #print("Communities:", communities)
-        #print("Modularity:", mod)
-    '''
 main()

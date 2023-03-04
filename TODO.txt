@@ -1,2 +1,1 @@
-Rifare grafi con colori diversi dopo aver scelto quali mostrare nella presentazione
-terminare analisi py nx
+Da rivedere tre metodi, decidere se fare le probabilità di persistenza e fare tutte le foto
