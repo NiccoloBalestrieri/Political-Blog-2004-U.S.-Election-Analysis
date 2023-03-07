@@ -159,7 +159,7 @@ def plotInDegreeDistribution(graph):
     cnt = tuple(i/graph.number_of_nodes() for i in cnt)
     plt.title("In-Degree distribution")
     plt.xlabel("k")
-    plt.ylabel("P_in(k)")
+    plt.ylabel(r'$P_{in}$(k)')
     plt.plot(deg, cnt, label="In Degree Distribution")
     plt.show()
 
@@ -170,8 +170,8 @@ def plotOutDegreeDistribution(graph):
     cnt = tuple(i/graph.number_of_nodes() for i in cnt)
     plt.title("Out-Degree distribution")
     plt.xlabel("k")
-    plt.ylabel("P_out(k)")
-    plt.plot(deg, cnt)
+    plt.ylabel(r'$P_{out}$(k)')
+    plt.plot(deg, cnt, '-', markersize=8)
     plt.show()
 
 def plotInDegreeCumulativeDistribution(graph):
@@ -181,10 +181,10 @@ def plotInDegreeCumulativeDistribution(graph):
     cnt = tuple(i/graph.number_of_nodes() for i in cnt)
     cdf = np.cumsum(cnt)
     
-    plt.figure(figsize=(12, 8))
+    #plt.figure(figsize=(12, 8))
     plt.title("In-Degree cumulated distribution")
     plt.xlabel("k")
-    plt.ylabel("P_in_cumulative(k)")
+    plt.ylabel(r'$\bar{P}_{in}$(k)')
     plt.plot(deg, cdf, '-', markersize=8)
     plt.xscale('log')
     plt.yscale('log')
@@ -197,11 +197,11 @@ def plotOutDegreeCumulativeDistribution(graph):
     cnt = tuple(i/graph.number_of_nodes() for i in cnt)
     cdf = np.cumsum(cnt)
     
-    plt.figure(figsize=(12, 8))
+    #plt.figure(figsize=(12, 8))
     plt.title("Out-Degree cumulated distribution")
     plt.xlabel("k")
-    plt.ylabel("P_out_cumulative(k)")
-    plt.plot(deg, cdf, '-o', markersize=8)
+    plt.ylabel(r'$\bar{P}_{out}$(k)')
+    plt.plot(deg, cdf, '-', markersize=8)
     plt.xscale('log')
     plt.yscale('log')
     plt.show()
@@ -237,13 +237,6 @@ def OutScaleFree(graph):
     plt.show()
     # Print the power-law exponent
     print(f"Power-law exponent for Out-Degree Distribution: {fit.power_law.alpha}") #tra 2 e 3 è scale free, se no no
-
-def drawUncorrelatedNetwroks(graph):
-    pos = nx.spring_layout(graph, seed=42)
-    nx.draw_networkx_nodes(graph, pos, node_size=15)
-    nx.draw_networkx_edges(graph, pos, width=0.3, alpha = 0.5)
-    plt.axis('off')
-    plt.show() #nodi con un alto grado di entrata tendono a connettersi con nodi con un basso grado di uscita
 
 def pageRank(graph):
     # Compute the PageRank score for each node
@@ -435,11 +428,6 @@ def attackPageRank(graph):
     plt.legend()
     plt.show()
 
-def efficienyGlobal(graph):
-    eff = global_efficiency(graph)
-    print("Efficienza globale: ", eff)
-    return eff
-
 def autHub(graph):
     # calcolo delle centralità di hub e di autorità
     hubs, authorities = nx.hits(graph)
@@ -458,25 +446,23 @@ def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
 
-    communities = defineCommunities(graph)
-    mod = modularity(graph, communities)
-    scc, wcc, n_scc, n_wcc = components(graph)
-    InScaleFree(graph) #da rivedere
-    OutScaleFree(graph) #da rivedere
-    plotInDegreeDistribution(graph)
-    plotOutDegreeDistribution(graph)
-    plotInDegreeCumulativeDistribution(graph)
-    plotOutDegreeCumulativeDistribution(graph)
-    drawUncorrelatedNetwroks(graph) #da rivedere
-    attackOutDegree(graph.copy())
-    attackInDegree(graph.copy())
-    attackPageRank(graph.copy())
-    failures(graph.copy())
+    #communities = defineCommunities(graph)
+    #mod = modularity(graph, communities)
+    #scc, wcc, n_scc, n_wcc = components(graph)
+    #InScaleFree(graph) #da rivedere
+    #OutScaleFree(graph) #da rivedere
+    #plotInDegreeDistribution(graph)
+    #plotOutDegreeDistribution(graph)
+    #plotInDegreeCumulativeDistribution(graph)
+    #plotOutDegreeCumulativeDistribution(graph)
+    #attackOutDegree(graph.copy())
+    #attackInDegree(graph.copy())
+    #attackPageRank(graph.copy())
+    #failures(graph.copy())
     #compute_infomap(graph)
-    drawCoreDecomposition(graph)
-    linkPrediction(edges)
-    #efficienyGlobal(graph)
-    autHub(graph)
+    #drawCoreDecomposition(graph)
+    #linkPrediction(edges)
+    #autHub(graph)
 
     page_rank = pageRank(graph) #top 5 nodes
     degree_centrality = degreeCentrality(graph) #top 5 nodes
