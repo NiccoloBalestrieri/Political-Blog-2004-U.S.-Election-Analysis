@@ -112,37 +112,61 @@ def degreeCentrality(graph):
 
 def outDegreeCentrality(graph):
     out_degree = nx.out_degree_centrality(graph)
-    sorted_out_degree = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
-    top_5 = sorted_out_degree[:5]
+    # ordinamento dei nodi per centralità
+    sorted_centrality = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
+    # selezione dei primi 5 nodi con punteggio migliore
+    top_5 = sorted_centrality[:5]
+    # creazione del dizionario con i valori di node centrality
+    top_5_dict = {node: score for node, score in top_5}
     # creazione del grafico a barre
-    x = [node for node, score in top_5]
-    y = [score for node, score in top_5]
+    fig, ax = plt.subplots()
+    plt.title("Out-Node centrality")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    ax.bar(positions, top_5_dict.values(), width=0.5)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict.keys())
+    ax.tick_params(axis='x', which='both', length=0)
 
-    plt.bar(x, y)
-    plt.xlabel("Node's ID")
-    plt.ylabel("Centrality value")
     plt.show()
-    return top_5
 
 def inDegreeCentrality(graph):
     in_degree = nx.in_degree_centrality(graph)
-    sorted_in_degree = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
-    top_5 = sorted_in_degree[:5]
+    # ordinamento dei nodi per centralità
+    sorted_centrality = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
+    # selezione dei primi 5 nodi con punteggio migliore
+    top_5 = sorted_centrality[:5]
+    # creazione del dizionario con i valori di node centrality
+    top_5_dict = {node: score for node, score in top_5}
     # creazione del grafico a barre
-    x = [node for node, score in top_5]
-    y = [score for node, score in top_5]
+    fig, ax = plt.subplots()
+    plt.title("In-Node centrality")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    ax.bar(positions, top_5_dict.values(), width=0.5)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict.keys())
+    ax.tick_params(axis='x', which='both', length=0)
 
-    plt.bar(x, y)
-    plt.xlabel("Node's ID")
-    plt.ylabel("Centrality value")
     plt.show()
-    return top_5
 
 def betweennessCentrality(graph):
     betweenness = nx.betweenness_centrality(graph)
     sorted_betweenness = sorted(betweenness.items(), key=lambda x: x[1], reverse=True)
     top_5 = sorted_betweenness[:5]
-    return top_5
+    # creazione del dizionario con i valori di node centrality
+    top_5_dict = {node: score for node, score in top_5}
+    # creazione del grafico a barre
+    fig, ax = plt.subplots()
+    plt.title("Betweenness centrality")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    ax.bar(positions, top_5_dict.values(), width=0.5)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict.keys())
+    ax.tick_params(axis='x', which='both', length=0)
+    
+    plt.show()
 
 def closenessCentrality(graph):
     closeness = nx.closeness_centrality(graph)
@@ -489,29 +513,23 @@ def main():
 
     page_rank = pageRank(graph) #top 5 nodes
     degree_centrality = degreeCentrality(graph) #top 5 nodes
-    betweenness_centrality = betweennessCentrality(graph) #top 5 nodes
-    out_degree = outDegreeCentrality(graph) #top 5 nodes
-    in_degree = inDegreeCentrality(graph) #top 5 nodes
+    betweennessCentrality(graph) #top 5 nodes
+    #outDegreeCentrality(graph) #top 5 nodes
+    #inDegreeCentrality(graph) #top 5 nodes
     closeness_centrality = closenessCentrality(graph) #top 5 nodes
     degree_centrality_str = ", ".join([str(node) for node in degree_centrality])
-    out_degree_str = ", ".join([str(node) for node in out_degree])
-    in_degree_str = ", ".join([str(node) for node in in_degree])
-    betweenness_centrality_str = ", ".join([str(node) for node in betweenness_centrality])
     closeness_centrality_str = ", ".join([str(node) for node in closeness_centrality])
     assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
     
     print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
     print("Top 5 nodes degree centrality: " + degree_centrality_str)
-    print("Top 5 nodes out degree: " + out_degree_str)
-    print("Top 5 nodes in degree: " + in_degree_str)
-    print("Top 5 nodes betweenness centrality: " + betweenness_centrality_str)
     print("Top 5 nodes closeness centrality: " + closeness_centrality_str)
     #print(page_rank.values()) #capire perchè non va e perchè l'ho fatto
-    print("Communities:", communities)
-    print("Modularity:", mod)
-    print("Dimension of the largest strongly connected component: " + str(len(scc)))
-    print("Dimension of the largest weakly connected component: " + str(len(wcc)))
-    print("Number of all the strongly connected components: " + str(n_scc))
-    print("Number of all the weakly connected components:" + str(n_wcc))
+    #print("Communities:", communities)
+    #print("Modularity:", mod)
+    #print("Dimension of the largest strongly connected component: " + str(len(scc)))
+    #print("Dimension of the largest weakly connected component: " + str(len(wcc)))
+    #print("Number of all the strongly connected components: " + str(n_scc))
+    #print("Number of all the weakly connected components:" + str(n_wcc))
 
 main()
