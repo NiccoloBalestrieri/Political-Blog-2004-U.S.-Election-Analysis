@@ -9,6 +9,7 @@ import random
 from igraph import Graph
 from networkx.algorithms.efficiency_measures import global_efficiency
 
+import powerlaw
 import networkit as nt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
@@ -113,12 +114,28 @@ def outDegreeCentrality(graph):
     out_degree = nx.out_degree_centrality(graph)
     sorted_out_degree = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
     top_5 = sorted_out_degree[:5]
+    # creazione del grafico a barre
+    x = [node for node, score in top_5]
+    y = [score for node, score in top_5]
+
+    plt.bar(x, y)
+    plt.xlabel("Node's ID")
+    plt.ylabel("Centrality value")
+    plt.show()
     return top_5
 
 def inDegreeCentrality(graph):
     in_degree = nx.in_degree_centrality(graph)
     sorted_in_degree = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
     top_5 = sorted_in_degree[:5]
+    # creazione del grafico a barre
+    x = [node for node, score in top_5]
+    y = [score for node, score in top_5]
+
+    plt.bar(x, y)
+    plt.xlabel("Node's ID")
+    plt.ylabel("Centrality value")
+    plt.show()
     return top_5
 
 def betweennessCentrality(graph):
@@ -441,10 +458,16 @@ def autHub(graph):
     print("Top 5 nodi per centralità di autorità:")
     for node, centrality in top_authorities:
         print(node, centrality)
+    print("----------")
 
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
+    
+    #degree_sequence = [d for n, d in graph.degree()]
+    #fit = powerlaw.Fit(np.array(degree_sequence) + 1, discrete=True)
+    #print(fit.alpha)
+    #print("alpha")
 
     #communities = defineCommunities(graph)
     #mod = modularity(graph, communities)
@@ -476,7 +499,7 @@ def main():
     betweenness_centrality_str = ", ".join([str(node) for node in betweenness_centrality])
     closeness_centrality_str = ", ".join([str(node) for node in closeness_centrality])
     assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
-
+    
     print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
     print("Top 5 nodes degree centrality: " + degree_centrality_str)
     print("Top 5 nodes out degree: " + out_degree_str)
