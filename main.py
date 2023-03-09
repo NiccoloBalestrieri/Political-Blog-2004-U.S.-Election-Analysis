@@ -1,5 +1,4 @@
 import pandas as pd
-import csv
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,15 +6,12 @@ import powerlaw
 import infomap
 import random
 from igraph import Graph
-from networkx.algorithms.efficiency_measures import global_efficiency
 
-import powerlaw
 import networkit as nt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 
 from collections import Counter
-from networkx.algorithms.distance_measures import diameter
 
 '''
 input_file = "C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/orientation.csv"
@@ -172,7 +168,18 @@ def closenessCentrality(graph):
     closeness = nx.closeness_centrality(graph)
     sorted_closeness = sorted(closeness.items(), key=lambda x: x[1], reverse=True)
     top_5 = sorted_closeness[:5]
-    return top_5
+    top_5_dict = {node: score for node, score in top_5}
+    # creazione del grafico a barre
+    fig, ax = plt.subplots()
+    plt.title("Closeness centrality")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    ax.bar(positions, top_5_dict.values(), width=0.5)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict.keys())
+    ax.tick_params(axis='x', which='both', length=0)
+    
+    plt.show()
 
 def defineCommunities(graph):
     communities = np.zeros(len(graph.nodes()))
@@ -281,13 +288,23 @@ def OutScaleFree(graph):
 
 def pageRank(graph):
     # Compute the PageRank score for each node
-    pr = nx.pagerank(graph, alpha=0.85, tol = 0.001)
+    pr = nx.pagerank(graph, alpha=0.85, tol=0.001)
     # Get the top 5 nodes with the highest PageRank score
-    top_nodes = sorted(pr, key=pr.get, reverse=True)[:5]
+    top_5 = sorted(pr, key=pr.get, reverse=True)[:5]
+    top_5_dict = {}
+    for node in top_5:
+        top_5_dict[node] = pr[node]
+    # creazione del grafico a barre
+    fig, ax = plt.subplots()
+    plt.title("PageRank centrality")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    ax.bar(positions, top_5_dict.values(), width=0.5)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict.keys())
+    ax.tick_params(axis='x', which='both', length=0)
 
-    for node in top_nodes:
-        print(f"{node}: {pr[node]}")
-    return top_nodes
+    plt.show()
 
 def inverse_community_mapping(partition):
     partition_mapping = {}
@@ -380,13 +397,51 @@ def compute_infomap(graph):
 def linkPrediction(graph):
     # crea un grafo diretto in igraph
     g = Graph.TupleList(graph.itertuples(index=False), directed=True)
+
     # calcola il punteggio di preferential attachment per tutte le coppie di vertici
-    pa_scores = [(i, j, g.degree(i) * g.degree(j)) for i in range(g.vcount()) for j in range(g.vcount()) if i != j]
-    # seleziona solo i 10 punteggi migliori
-    top_10 = sorted(pa_scores, key=lambda x: x[2], reverse=True)[:10]
-    # stampa i 10 punteggi migliori
-    for u, v, score in top_10:
-        print("({}, {}) -> {}".format(u, v, score))
+    pa_scores = [(f"{i}-{j}", g.degree(i) * g.degree(j)) for i in range(g.vcount()) for j in range(g.vcount()) if i != j]
+    # seleziona solo i 5 punteggi migliori
+    top_5_pa = sorted(pa_scores, key=lambda x: x[1], reverse=True)[:5]
+    pa_df = pd.DataFrame(top_5_pa, columns=['Nodes', 'Preferential Attachment Index'])
+    # creazione dei grafici a barre
+    pa_df.plot(kind='bar', x='Nodes', y='Preferential Attachment Index', figsize=(8,6), rot=0)
+    plt.title('Preferential Attachment Index')
+    plt.xlabel('Nodes')
+    plt.ylabel('Score')
+    plt.show()
+
+    # calcola il common neighbours index per tutte le coppie di vertici
+    cn_scores = [(f"{i}-{j}", len(set(g.neighbors(i)) & set(g.neighbors(j)))) for i in range(g.vcount()) for j in range(g.vcount()) if i != j]
+    # seleziona solo i 5 punteggi migliori
+    top_5_cn = sorted(cn_scores, key=lambda x: x[1], reverse=True)[:5]
+    cn_df = pd.DataFrame(top_5_cn, columns=['Nodes', 'Common Neighbours Index'])
+    cn_df.plot(kind='bar', x='Nodes', y='Common Neighbours Index', figsize=(8,6), rot=0)
+    plt.title('Common Neighbours Index')
+    plt.xlabel('Nodes')
+    plt.ylabel('Score')
+    plt.show()
+
+    # calcola il resource allocation index per tutte le coppie di vertici
+    ra_scores = []
+    for i in range(g.vcount()):
+        for j in range(g.vcount()):
+            if i != j and not g.are_connected(i, j):
+                common_neighbors = set(g.neighbors(i)) & set(g.neighbors(j))
+                if len(common_neighbors) > 0:
+                    ra_scores.append((f"{i}-{j}", sum(1/g.degree(k) for k in common_neighbors)))
+    # seleziona solo i 5 punteggi migliori
+    top_5_ra = sorted(ra_scores, key=lambda x: x[1], reverse=True)[:5]
+    ra_df = pd.DataFrame(top_5_ra, columns=['Nodes', 'Resource Allocation Index'])
+
+    # creazione del grafico a dispersione
+    #ra_df.plot(kind='scatter', x='Nodes', y='Resource Allocation Index', s=ra_df['Resource Allocation Index']*100, alpha=0.5, figsize=(8,6))
+    ra_df.plot(kind='bar', x='Nodes', y='Resource Allocation Index', figsize=(8,6), rot=0)
+    plt.title('Resource Allocation Index')
+    plt.xlabel('Nodo sorgente')
+    plt.ylabel('Nodo destinazione')
+
+    plt.show()
+    
 
 def failures(graph):
     num_nodes_to_remove = len(graph.nodes())
@@ -474,15 +529,32 @@ def autHub(graph):
     hubs, authorities = nx.hits(graph)
     # stampa dei primi 5 nodi con la centralità di hub più alta
     top_hubs = sorted(hubs.items(), key=lambda x: x[1], reverse=True)[:5]
-    print("Top 5 nodi per centralità di hub:")
-    for node, centrality in top_hubs:
-        print(node, centrality)
-    # stampa dei primi 5 nodi con la centralità di autorità più alta
+    top_5_dict_hubs = {node: score for node, score in top_hubs}
+    # creazione del grafico a barre
+    fig, ax = plt.subplots()
+    plt.title("Hubs")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    ax.bar(positions, top_5_dict_hubs.values(), width=0.5)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict_hubs.keys())
+    ax.tick_params(axis='x', which='both', length=0)
+    
+    plt.show()
+
     top_authorities = sorted(authorities.items(), key=lambda x: x[1], reverse=True)[:5]
-    print("Top 5 nodi per centralità di autorità:")
-    for node, centrality in top_authorities:
-        print(node, centrality)
-    print("----------")
+    top_5_dict_authorities = {node: score for node, score in top_authorities}
+    # creazione del grafico a barre
+    fig, ax = plt.subplots()
+    plt.title("Authorities")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    ax.bar(positions, top_5_dict_authorities.values(), width=0.5)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict_authorities.keys())
+    ax.tick_params(axis='x', which='both', length=0)
+    
+    plt.show()
 
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
@@ -502,28 +574,26 @@ def main():
     #plotOutDegreeDistribution(graph)
     #plotInDegreeCumulativeDistribution(graph)
     #plotOutDegreeCumulativeDistribution(graph)
-    #attackOutDegree(graph.copy())
-    #attackInDegree(graph.copy())
-    #attackPageRank(graph.copy())
-    #failures(graph.copy())
+    attackOutDegree(graph.copy())
+    attackInDegree(graph.copy())
+    attackPageRank(graph.copy())
+    failures(graph.copy())
     #compute_infomap(graph)
     #drawCoreDecomposition(graph)
     #linkPrediction(edges)
     #autHub(graph)
 
-    page_rank = pageRank(graph) #top 5 nodes
-    degree_centrality = degreeCentrality(graph) #top 5 nodes
-    betweennessCentrality(graph) #top 5 nodes
+    #pageRank(graph) #top 5 nodes
+    #degree_centrality = degreeCentrality(graph) #top 5 nodes
+    #betweennessCentrality(graph) #top 5 nodes
     #outDegreeCentrality(graph) #top 5 nodes
     #inDegreeCentrality(graph) #top 5 nodes
-    closeness_centrality = closenessCentrality(graph) #top 5 nodes
-    degree_centrality_str = ", ".join([str(node) for node in degree_centrality])
-    closeness_centrality_str = ", ".join([str(node) for node in closeness_centrality])
-    assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
+    #closenessCentrality(graph) #top 5 nodes
+    #degree_centrality_str = ", ".join([str(node) for node in degree_centrality])
+    #assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
     
-    print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
-    print("Top 5 nodes degree centrality: " + degree_centrality_str)
-    print("Top 5 nodes closeness centrality: " + closeness_centrality_str)
+    #print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
+    #print("Top 5 nodes degree centrality: " + degree_centrality_str)
     #print(page_rank.values()) #capire perchè non va e perchè l'ho fatto
     #print("Communities:", communities)
     #print("Modularity:", mod)
