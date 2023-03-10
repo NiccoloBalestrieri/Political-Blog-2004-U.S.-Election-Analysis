@@ -556,10 +556,28 @@ def autHub(graph):
     
     plt.show()
 
+def data():
+    # Dati del grafico
+    barre = ['Net. Diameter', 'Avg. Path length', 'Avg. Clustering Coefficient', 'Graph Density']
+    altezze = [9, 3.390, 0.210, 0.013]
+    colori = ['red', 'blue', 'green', 'purple']
+
+    # Creazione del grafico
+    plt.barh(barre, altezze, color=colori)
+
+    # Aggiunta di titolo e label degli assi
+    plt.title('Network properties')
+    plt.xlabel('Values')
+    plt.ylabel('Properties')
+
+    # Visualizzazione del grafico
+    plt.show()
+
+
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
-    
+    data()
     #degree_sequence = [d for n, d in graph.degree()]
     #fit = powerlaw.Fit(np.array(degree_sequence) + 1, discrete=True)
     #print(fit.alpha)
@@ -574,10 +592,10 @@ def main():
     #plotOutDegreeDistribution(graph)
     #plotInDegreeCumulativeDistribution(graph)
     #plotOutDegreeCumulativeDistribution(graph)
-    attackOutDegree(graph.copy())
-    attackInDegree(graph.copy())
-    attackPageRank(graph.copy())
-    failures(graph.copy())
+    #attackOutDegree(graph.copy())
+    #attackInDegree(graph.copy())
+    #attackPageRank(graph.copy())
+    #failures(graph.copy())
     #compute_infomap(graph)
     #drawCoreDecomposition(graph)
     #linkPrediction(edges)
