@@ -118,7 +118,8 @@ def outDegreeCentrality(graph):
     fig, ax = plt.subplots()
     plt.title("Out-Node centrality")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict.values(), width=0.5)
+    clr = ['green', 'Olive', 'Lime', 'Fuchsia', 'pink']
+    ax.bar(positions, top_5_dict.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict.keys())
@@ -138,7 +139,8 @@ def inDegreeCentrality(graph):
     fig, ax = plt.subplots()
     plt.title("In-Node centrality")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict.values(), width=0.5)
+    clr = ['green', 'Olive', 'Lime', 'Fuchsia', 'pink']
+    ax.bar(positions, top_5_dict.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict.keys())
@@ -156,7 +158,8 @@ def betweennessCentrality(graph):
     fig, ax = plt.subplots()
     plt.title("Betweenness centrality")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict.values(), width=0.5)
+    clr = ['purple', 'fuchsia', 'salmon', 'pink', 'pink']
+    ax.bar(positions, top_5_dict.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict.keys())
@@ -173,7 +176,7 @@ def closenessCentrality(graph):
     fig, ax = plt.subplots()
     plt.title("Closeness centrality")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict.values(), width=0.5)
+    ax.bar(positions, top_5_dict.values(), width=0.5, color = 'green')
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict.keys())
@@ -208,7 +211,7 @@ def plotInDegreeDistribution(graph):
     plt.title("In-Degree distribution")
     plt.xlabel("k")
     plt.ylabel(r'$P_{in}$(k)')
-    plt.plot(deg, cnt, label="In Degree Distribution")
+    plt.plot(deg, cnt, '-', markersize=8)
     plt.show()
 
 def plotOutDegreeDistribution(graph):
@@ -298,7 +301,8 @@ def pageRank(graph):
     fig, ax = plt.subplots()
     plt.title("PageRank centrality")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict.values(), width=0.5)
+    clr = ['purple', 'fuchsia', 'salmon', 'pink', 'pink']
+    ax.bar(positions, top_5_dict.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict.keys())
@@ -534,7 +538,8 @@ def autHub(graph):
     fig, ax = plt.subplots()
     plt.title("Hubs")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict_hubs.values(), width=0.5)
+    clr = ['SeaGreen', 'MediumSeaGreen', 'PaleGreen', 'springGreen', 'LightGreen']
+    ax.bar(positions, top_5_dict_hubs.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict_hubs.keys())
@@ -548,7 +553,8 @@ def autHub(graph):
     fig, ax = plt.subplots()
     plt.title("Authorities")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict_authorities.values(), width=0.5)
+    clr = ['SeaGreen', 'MediumSeaGreen', 'PaleGreen', 'springGreen', 'LightGreen']
+    ax.bar(positions, top_5_dict_authorities.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict_authorities.keys())
@@ -558,12 +564,12 @@ def autHub(graph):
 
 def data():
     # Dati del grafico
-    barre = ['Net. Diameter', 'Avg. Path length', 'Avg. Clustering Coefficient', 'Graph Density']
-    altezze = [9, 3.390, 0.210, 0.013]
-    colori = ['red', 'blue', 'green', 'purple']
+    y = ['Net. Diameter', 'Avg. Path length', 'Avg. Clustering Coefficient', 'Graph Density']
+    x = [9, 3.390, 0.210, 0.013]
+    clr = ['red', 'blue', 'green', 'purple']
 
     # Creazione del grafico
-    plt.barh(barre, altezze, color=colori)
+    plt.barh(y, x, color=clr)
 
     # Aggiunta di titolo e label degli assi
     plt.title('Network properties')
@@ -577,11 +583,7 @@ def data():
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
-    data()
-    #degree_sequence = [d for n, d in graph.degree()]
-    #fit = powerlaw.Fit(np.array(degree_sequence) + 1, discrete=True)
-    #print(fit.alpha)
-    #print("alpha")
+    #data()
 
     #communities = defineCommunities(graph)
     #mod = modularity(graph, communities)
@@ -601,7 +603,7 @@ def main():
     #linkPrediction(edges)
     #autHub(graph)
 
-    #pageRank(graph) #top 5 nodes
+    pageRank(graph) #top 5 nodes
     #degree_centrality = degreeCentrality(graph) #top 5 nodes
     #betweennessCentrality(graph) #top 5 nodes
     #outDegreeCentrality(graph) #top 5 nodes
