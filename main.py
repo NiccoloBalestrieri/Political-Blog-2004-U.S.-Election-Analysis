@@ -6,6 +6,7 @@ import powerlaw
 import infomap
 import random
 from igraph import Graph
+import csv
 
 import networkit as nt
 import matplotlib.colors as colors
@@ -14,48 +15,6 @@ import matplotlib.cm as cm
 from collections import Counter
 
 '''
-input_file = "C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/orientation.csv"
-output_file = "C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/orientation_index.csv"
-
-# Open the input and output CSV files
-with open(input_file, "r") as input_f, open(output_file, "w", newline="") as output_f:
-    reader = csv.reader(input_f)
-    writer = csv.writer(output_f)
-    
-    # Iterate over the input rows and add an index to each row
-    for i, row in enumerate(reader):
-        row_with_index = [i] + row 
-        writer.writerow(row_with_index)
-
-# Print a message to confirm that the output file was created
-print(f"Indexed CSV file created: {output_file}")
-
-
-edge = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/edge_list.csv")
-url = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/orientation_index.csv", usecols=["Orientation"])
-
-
-def get_url(row):
-    f, t = row["Source;Target"].split(";")
-    return {"Source": url['Orientation'].iloc[int(f) - 1], 'Target': url['Orientation'].iloc[int(t) - 1]}
-
-merged = edge.apply(get_url, axis=1, result_type='expand')
-merged.columns = ["Source", "Target"]
-merged.to_csv("C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/Blog_link_gephi.csv", index = False)
-
-def createGraph():
-    with open('C:/Users/nicol/Desktop/darkweb.csv', 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=";")
-        edges = []
-        next(reader)
-        for row in reader:
-            edges.append((row[0], row[1], float(row[3])))
-
-    graph = nx.DiGraph()
-    graph.add_weighted_edges_from(edges)
-    return graph
-
-//////
 # Leggi il file CSV contenente la lista degli archi
 with open('C:/Users/nicco/OneDrive/Documenti/ProgettoCSR/dataset/edge_list.csv', 'r') as f:
     reader = csv.reader(f, delimiter=';')
@@ -100,6 +59,21 @@ def components(graph):
     n_wcc = nx.number_weakly_connected_components(graph)
     return scc, wcc, n_scc, n_wcc
 
+def write_largest_connected_component(graph, filename):
+    # Calcola la più grande componente connessa
+    scc = max(nx.strongly_connected_components(graph), key=len)
+    print(len(scc))
+    graph = graph.subgraph(scc)
+    # Crea un elenco di tuple che rappresentano gli archi della rete
+    edges = list(graph.edges())
+    print(len(edges))
+    # Salva le coppie di nodi e i relativi archi in un file CSV
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=';')
+        writer.writerow(['Source', 'Target'])
+        for edge in edges:
+            writer.writerow(edge)
+
 def degreeCentrality(graph):
     degree = nx.degree_centrality(graph)
     sorted_degree = sorted(degree.items(), key=lambda x: x[1], reverse=True)
@@ -118,7 +92,7 @@ def outDegreeCentrality(graph):
     fig, ax = plt.subplots()
     plt.title("Out-Node centrality")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    clr = ['green', 'Olive', 'Lime', 'Fuchsia', 'pink']
+    clr = ['SeaGreen', 'pink', 'pink', 'pink', 'pink']
     ax.bar(positions, top_5_dict.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
@@ -139,7 +113,7 @@ def inDegreeCentrality(graph):
     fig, ax = plt.subplots()
     plt.title("In-Node centrality")
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    clr = ['green', 'Olive', 'Lime', 'Fuchsia', 'pink']
+    clr = ['SeaGreen', 'MediumSeaGreen', 'MediumSeaGreen', 'MediumSeaGreen', 'PaleGreen']
     ax.bar(positions, top_5_dict.values(), width=0.5, color = clr)
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
@@ -381,23 +355,6 @@ def drawCoreDecomposition(graph):
     # Show the plot
     plt.show()
 
-def compute_infomap(graph):
-    im = infomap.Infomap("--directed")
-    print("---")
-    for edge in graph.edges():
-        print(edge[0], edge[1])
-        im.addLink(edge[0], edge[1])
-    im.run()
-    communities = {}
-    for node in im.iterTree():
-        if node.isLeaf():
-            community = node.moduleIndex()
-            node_id = node.physicalId
-            if community not in communities:
-                communities[community] = []
-            communities[community].append(node_id)
-    print(communities)
-
 def linkPrediction(graph):
     # crea un grafo diretto in igraph
     g = Graph.TupleList(graph.itertuples(index=False), directed=True)
@@ -448,7 +405,8 @@ def linkPrediction(graph):
     
 
 def failures(graph):
-    num_nodes_to_remove = len(graph.nodes())
+    #num_nodes_to_remove = len(graph.nodes()) #togli tutti i nodi 
+    num_nodes_to_remove = int(0.3 * len(graph.nodes()))
     x_values = []
     y_values = []
     for i in range(num_nodes_to_remove):
@@ -461,6 +419,13 @@ def failures(graph):
     plt.ylabel('Size of largest strongly connected component')
     plt.legend()
     plt.show()
+    efficiency = 0
+    for node in graph.nodes():
+        shortest_paths = nx.shortest_path_length(graph, source=node)
+        node_efficiency = sum([1/path for path in shortest_paths.values() if path != 0])/(len(graph.nodes())-1)
+        efficiency += node_efficiency
+    efficiency /= len(graph.nodes())*(len(graph.nodes())-1)
+    print("Efficiency:", efficiency)
 
 def attackOutDegree(graph):
     out_degree = nx.out_degree_centrality(graph)
@@ -567,10 +532,8 @@ def data():
     y = ['Net. Diameter', 'Avg. Path length', 'Avg. Clustering Coefficient', 'Graph Density']
     x = [9, 3.390, 0.210, 0.013]
     clr = ['red', 'blue', 'green', 'purple']
-
     # Creazione del grafico
     plt.barh(y, x, color=clr)
-
     # Aggiunta di titolo e label degli assi
     plt.title('Network properties')
     plt.xlabel('Values')
@@ -580,11 +543,65 @@ def data():
     plt.show()
 
 
+def plot_attacks(graph):
+    num_nodes_to_remove = len(graph.nodes())
+    x_values = []
+    y_values_failures = []
+    y_values_attack_out = []
+    y_values_attack_in = []
+    y_values_attack_pagerank = []
+
+    for i in range(num_nodes_to_remove):
+        # Failures attack
+        graph_copy = graph.copy()
+        graph_copy.remove_node(random.choice(list(graph_copy.nodes())))
+        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
+        y_values_failures.append(len(scc))
+
+        # Out degree attack
+        graph_copy = graph.copy()
+        out_degree = nx.out_degree_centrality(graph_copy)
+        sorted_out_degree = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
+        nodes_to_remove = [n[0] for n in sorted_out_degree[:i+1]]
+        graph_copy.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
+        y_values_attack_out.append(len(scc))
+
+        # In degree attack
+        graph_copy = graph.copy()
+        in_degree = nx.in_degree_centrality(graph_copy)
+        sorted_in_degree = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
+        nodes_to_remove = [n[0] for n in sorted_in_degree[:i+1]]
+        graph_copy.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
+        y_values_attack_in.append(len(scc))
+
+        # PageRank attack
+        graph_copy = graph.copy()
+        pagerank = nx.pagerank(graph_copy)
+        sorted_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)
+        nodes_to_remove = [n[0] for n in sorted_pagerank[:i+1]]
+        graph_copy.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
+        y_values_attack_pagerank.append(len(scc))
+
+        x_values.append(i+1)
+        print(i)
+
+    plt.plot(x_values, y_values_failures, label='Random failure')
+    plt.plot(x_values, y_values_attack_out, label='Out degree attack')
+    plt.plot(x_values, y_values_attack_in, label='In degree attack')
+    plt.plot(x_values, y_values_attack_pagerank, label='PageRank attack')
+    plt.xlabel('Number of nodes removed')
+    plt.ylabel('Size of largest strongly connected component')
+    plt.legend()
+    plt.show()
+
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
     #data()
-
+    #write_largest_connected_component(graph, 'C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/largest_component.csv')
     #communities = defineCommunities(graph)
     #mod = modularity(graph, communities)
     #scc, wcc, n_scc, n_wcc = components(graph)
@@ -597,13 +614,12 @@ def main():
     #attackOutDegree(graph.copy())
     #attackInDegree(graph.copy())
     #attackPageRank(graph.copy())
-    #failures(graph.copy())
-    #compute_infomap(graph)
+    failures(graph.copy())
     #drawCoreDecomposition(graph)
     #linkPrediction(edges)
     #autHub(graph)
-
-    pageRank(graph) #top 5 nodes
+    #plot_attacks(graph)
+    #pageRank(graph) #top 5 nodes
     #degree_centrality = degreeCentrality(graph) #top 5 nodes
     #betweennessCentrality(graph) #top 5 nodes
     #outDegreeCentrality(graph) #top 5 nodes
