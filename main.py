@@ -74,6 +74,20 @@ def write_largest_connected_component(graph, filename):
         for edge in edges:
             writer.writerow(edge)
 
+    # Apri il file CSV di input in modalità di lettura
+    with open(filename, 'r') as csv_file:
+        # Leggi le coppie di origine dal file CSV
+        original_pairs = [tuple(row) for row in csv.reader(csv_file, delimiter=';')]
+
+    # Modifica le coppie di origine come richiesto
+    modified_pairs = [(str(pair[0]) + "A", str(pair[1]) + "A") for pair in original_pairs]
+
+    # Apri il file CSV di output in modalità di scrittura
+    with open('C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/largest_componentA.csv.csv', 'w', newline='') as csv_file:
+        # Scrivi le coppie modificate nel file CSV di output
+        writer = csv.writer(csv_file, delimiter=';')
+        writer.writerows(modified_pairs)
+
 def degreeCentrality(graph):
     degree = nx.degree_centrality(graph)
     sorted_degree = sorted(degree.items(), key=lambda x: x[1], reverse=True)
@@ -231,38 +245,6 @@ def plotOutDegreeCumulativeDistribution(graph):
     plt.yscale('log')
     plt.show()
 
-def InScaleFree(graph):
-    # Calcolo la distribuzione del grado dei nodi
-    degree_dist = [d for n, d in graph.in_degree()]
-    # Fitting della distribuzione con una legge di potenza
-    fit = powerlaw.Fit(degree_dist, discrete=True)
-    # Plot della distribuzione del grado e della legge di potenza fittata
-    fig, ax = plt.subplots()
-    fit.plot_pdf(color='b', linewidth=2)
-    fit.power_law.plot_pdf(color='r', linestyle='--', ax=ax)
-    plt.xlabel('In-Degree Distribution')
-    plt.ylabel('In-degree Power Law Fit')
-    plt.legend(['In-Degree Distribution', 'Power Law Fit'])
-    plt.show()
-    # Print the power-law exponent
-    print(f"Power-law exponent for In-Degree Distribution: {fit.power_law.alpha}") #tra 2 e 3 è scale free, se no no
-
-def OutScaleFree(graph):
-    # Calcolo la distribuzione del grado dei nodi
-    degree_dist = [d for n, d in graph.out_degree()]
-    # Fitting della distribuzione con una legge di potenza
-    fit = powerlaw.Fit(degree_dist, discrete=True)
-    # Plot della distribuzione del grado e della legge di potenza fittata
-    fig, ax = plt.subplots()
-    fit.plot_pdf(color='b', linewidth=2)
-    fit.power_law.plot_pdf(color='r', linestyle='--', ax=ax)
-    plt.xlabel('Out-Degree Distribution')
-    plt.ylabel('Out-degree Power Law Fit')
-    plt.legend(['Out-Degree Distribution', 'Power Law Fit'])
-    plt.show()
-    # Print the power-law exponent
-    print(f"Power-law exponent for Out-Degree Distribution: {fit.power_law.alpha}") #tra 2 e 3 è scale free, se no no
-
 def pageRank(graph):
     # Compute the PageRank score for each node
     pr = nx.pagerank(graph, alpha=0.85, tol=0.001)
@@ -358,7 +340,6 @@ def drawCoreDecomposition(graph):
 def linkPrediction(graph):
     # crea un grafo diretto in igraph
     g = Graph.TupleList(graph.itertuples(index=False), directed=True)
-
     # calcola il punteggio di preferential attachment per tutte le coppie di vertici
     pa_scores = [(f"{i}-{j}", g.degree(i) * g.degree(j)) for i in range(g.vcount()) for j in range(g.vcount()) if i != j]
     # seleziona solo i 5 punteggi migliori
@@ -401,8 +382,7 @@ def linkPrediction(graph):
     plt.xlabel('Nodo sorgente')
     plt.ylabel('Nodo destinazione')
 
-    plt.show()
-    
+    plt.show()  
 
 def failures(graph):
     #num_nodes_to_remove = len(graph.nodes()) #togli tutti i nodi 
@@ -529,9 +509,9 @@ def autHub(graph):
 
 def data():
     # Dati del grafico
-    y = ['Net. Diameter', 'Avg. Path length', 'Avg. Clustering Coefficient', 'Graph Density']
-    x = [9, 3.390, 0.210, 0.013]
-    clr = ['red', 'blue', 'green', 'purple']
+    y = ['Net. Diameter', 'Avg. Path length', 'Avg. Clustering Coefficient', 'Graph Density', 'Efficieny']
+    x = [9, 3.390, 0.210, 0.013, 0.00018]
+    clr = ['red', 'blue', 'green', 'purple', 'yellow']
     # Creazione del grafico
     plt.barh(y, x, color=clr)
     # Aggiunta di titolo e label degli assi
@@ -545,19 +525,26 @@ def data():
 
 def plot_attacks(graph):
     num_nodes_to_remove = len(graph.nodes())
-    x_values = []
+    x_values_failures = []
+    x_values_page = []
+
     y_values_failures = []
     y_values_attack_out = []
     y_values_attack_in = []
     y_values_attack_pagerank = []
+    y_value_attack_betweenness = []
 
+    graph_copy_failures = graph.copy()
+    
     for i in range(num_nodes_to_remove):
         # Failures attack
-        graph_copy = graph.copy()
-        graph_copy.remove_node(random.choice(list(graph_copy.nodes())))
-        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
+        graph_copy_failures.remove_node(random.choice(list(graph_copy_failures.nodes())))
+        scc = max(nx.strongly_connected_components(graph_copy_failures), key=len) if graph_copy_failures else set()
         y_values_failures.append(len(scc))
+        x_values_failures.append(i+1)
+        print(i)
 
+    for i in range(num_nodes_to_remove):
         # Out degree attack
         graph_copy = graph.copy()
         out_degree = nx.out_degree_centrality(graph_copy)
@@ -585,21 +572,40 @@ def plot_attacks(graph):
         scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
         y_values_attack_pagerank.append(len(scc))
 
-        x_values.append(i+1)
-        print(i)
+        # Betweenness attack
+        graph_copy = graph.copy()
+        betweenness = nx.betweenness_centrality(graph_copy)
+        sorted_betweenness = sorted(betweenness.items(), key=lambda x: x[1], reverse=True)
+        nodes_to_remove = [n[0] for n in sorted_betweenness[:i+1]]
+        graph_copy.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
+        y_value_attack_betweenness.append(len(scc))
 
-    plt.plot(x_values, y_values_failures, label='Random failure')
-    plt.plot(x_values, y_values_attack_out, label='Out degree attack')
-    plt.plot(x_values, y_values_attack_in, label='In degree attack')
-    plt.plot(x_values, y_values_attack_pagerank, label='PageRank attack')
+        x_values_page.append(i+1)
+
+    plt.plot(x_values_failures, y_values_failures, label='Random failure')
+    plt.plot(x_values_page, y_values_attack_out, label='Out degree attack')
+    plt.plot(x_values_page, y_values_attack_in, label='In degree attack')
+    plt.plot(x_values_page, y_values_attack_pagerank, label='PageRank attack')
+    plt.plot(x_values_page, y_value_attack_betweenness, label='Betweenness attack')
     plt.xlabel('Number of nodes removed')
     plt.ylabel('Size of largest strongly connected component')
     plt.legend()
     plt.show()
 
+def global_efficieny(graph):
+    efficiency = 0
+    for node in graph.nodes():
+        shortest_paths = nx.shortest_path_length(graph, source=node)
+        node_efficiency = sum([1/path for path in shortest_paths.values() if path != 0])/(len(graph.nodes())-1)
+        efficiency += node_efficiency
+    efficiency /= len(graph.nodes())*(len(graph.nodes())-1)
+    print("Efficiency:", efficiency)
+
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
+    #global_efficieny(graph)
     #data()
     #write_largest_connected_component(graph, 'C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/largest_component.csv')
     #communities = defineCommunities(graph)
@@ -614,11 +620,11 @@ def main():
     #attackOutDegree(graph.copy())
     #attackInDegree(graph.copy())
     #attackPageRank(graph.copy())
-    failures(graph.copy())
+    #failures(graph.copy())
     #drawCoreDecomposition(graph)
     #linkPrediction(edges)
     #autHub(graph)
-    #plot_attacks(graph)
+    plot_attacks(graph)
     #pageRank(graph) #top 5 nodes
     #degree_centrality = degreeCentrality(graph) #top 5 nodes
     #betweennessCentrality(graph) #top 5 nodes
