@@ -602,11 +602,57 @@ def global_efficieny(graph):
     efficiency /= len(graph.nodes())*(len(graph.nodes())-1)
     print("Efficiency:", efficiency)
 
+def closenness(graph):
+    # Calculate the closeness centrality and closeness out centrality of each node
+    closeness_centrality = nx.closeness_centrality(graph)
+    G_reverse = graph.reverse()
+    closeness_out_centrality = nx.closeness_centrality(G_reverse, wf_improved=False)
+
+    # stampa dei primi 5 nodi con la centralità di hub più alta
+    top_cls_in = sorted(closeness_centrality.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_5_dict_cls_in = {node: score for node, score in top_cls_in}
+    # creazione del grafico a barre
+    fig, ax = plt.subplots()
+    plt.title("In-Closeness Centrality")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    clr = ['SeaGreen', 'MediumSeaGreen', 'MediumSeaGreen', 'MediumSeaGreen', 'MediumSeaGreen']
+    ax.bar(positions, top_5_dict_cls_in.values(), width=0.5, color = clr)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict_cls_in.keys())
+    ax.tick_params(axis='x', which='both', length=0)
+    
+    plt.show()
+
+    # stampa dei primi 5 nodi con la centralità di hub più alta
+    top_cls_out = sorted(closeness_out_centrality.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_5_dict_cls_out = {node: score for node, score in top_cls_out}
+    # creazione del grafico a barre
+    fig, ax = plt.subplots()
+    plt.title("Out-Closeness Centrality")
+    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
+    clr = ['SeaGreen', 'SeaGreen', 'SeaGreen', 'SeaGreen', 'SeaGreen']
+    ax.bar(positions, top_5_dict_cls_out.values(), width=0.5, color = clr)
+    # personalizzazione dell'asse x
+    ax.set_xticks(positions)
+    ax.set_xticklabels(top_5_dict_cls_out.keys())
+    ax.tick_params(axis='x', which='both', length=0)
+    
+    plt.show()
+
+    # Write the results to a CSV file
+    with open('C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/centrality_metrics.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Id', 'Closeness Centrality', 'Closeness Out Centrality'])
+        for node in graph.nodes():
+            writer.writerow([node, closeness_centrality[node], closeness_out_centrality[node]])
+
 def main():
     edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
     #global_efficieny(graph)
     #data()
+    #closenness(graph)
     #write_largest_connected_component(graph, 'C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/largest_component.csv')
     #communities = defineCommunities(graph)
     #mod = modularity(graph, communities)
