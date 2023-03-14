@@ -2,15 +2,9 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-import powerlaw
-import infomap
 import random
 from igraph import Graph
 import csv
-
-import networkit as nt
-import matplotlib.colors as colors
-import matplotlib.cm as cm
 
 from collections import Counter
 
@@ -382,95 +376,6 @@ def linkPrediction(graph):
     plt.xlabel('Nodo sorgente')
     plt.ylabel('Nodo destinazione')
 
-    plt.show()  
-
-def failures(graph):
-    #num_nodes_to_remove = len(graph.nodes()) #togli tutti i nodi 
-    num_nodes_to_remove = int(0.3 * len(graph.nodes()))
-    x_values = []
-    y_values = []
-    for i in range(num_nodes_to_remove):
-        graph.remove_node(random.choice(list(graph.nodes())))
-        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
-        x_values.append(i+1)
-        y_values.append(len(scc))
-    plt.plot(x_values, y_values, label='Random failure')
-    plt.xlabel('Number of nodes removed')
-    plt.ylabel('Size of largest strongly connected component')
-    plt.legend()
-    plt.show()
-    efficiency = 0
-    for node in graph.nodes():
-        shortest_paths = nx.shortest_path_length(graph, source=node)
-        node_efficiency = sum([1/path for path in shortest_paths.values() if path != 0])/(len(graph.nodes())-1)
-        efficiency += node_efficiency
-    efficiency /= len(graph.nodes())*(len(graph.nodes())-1)
-    print("Efficiency:", efficiency)
-
-def attackOutDegree(graph):
-    out_degree = nx.out_degree_centrality(graph)
-    sorted_out_degree = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
-    num_nodes_to_remove = int(len(sorted_out_degree))
-
-    x_values = []
-    y_values = []
-
-    for i in range(num_nodes_to_remove):
-        nodes_to_remove = [n[0] for n in sorted_out_degree[:i+1]]
-        graph.remove_nodes_from(nodes_to_remove)
-        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
-        x_values.append(i+1)
-        y_values.append(len(scc))
-
-    print("New dimension of the largest strongly connected component (attack on out degree): " + str(len(scc)))
-    plt.plot(x_values, y_values, label='Out degree attack')
-    plt.xlabel('Number of nodes removed')
-    plt.ylabel('Size of largest strongly connected component')
-    plt.legend()
-    plt.show()
-
-def attackInDegree(graph):
-    in_degree = nx.in_degree_centrality(graph)
-    sorted_in_degree = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
-    num_nodes_to_remove = int(len(sorted_in_degree))
-
-    x_values = []
-    y_values = []
-
-    for i in range(num_nodes_to_remove):
-        nodes_to_remove = [n[0] for n in sorted_in_degree[:i+1]]
-        graph.remove_nodes_from(nodes_to_remove)
-        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
-        x_values.append(i+1)
-        y_values.append(len(scc))
-
-    print("New dimension of the largest strongly connected component (attack on in degree): " + str(len(scc)))
-    plt.plot(x_values, y_values, label='In degree attack')
-    plt.xlabel('Number of nodes removed')
-    plt.ylabel('Size of largest strongly connected component')
-    plt.legend()
-    plt.show()
-
-def attackPageRank(graph):
-    pagerank = nx.pagerank(graph)
-    sorted_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)
-    num_nodes_to_remove = int(len(sorted_pagerank))
-
-    x_values = []
-    y_values = []
-
-    for i in range(num_nodes_to_remove):
-        nodes_to_remove = [n[0] for n in sorted_pagerank[:i+1]]
-        graph.remove_nodes_from(nodes_to_remove)
-        scc = max(nx.strongly_connected_components(graph), key=len) if graph else set()
-        x_values.append(i+1)
-        y_values.append(len(scc))
-
-    print("New dimension of the largest strongly connected component (attack on PageRank): " + str(len(scc)))
-    plt.plot(x_values, y_values, label='PageRank attack')
-    plt.xlabel('Number of nodes removed')
-    plt.ylabel('Size of largest strongly connected component')
-    plt.legend()
     plt.show()
 
 def autHub(graph):
@@ -524,70 +429,97 @@ def data():
 
 
 def plot_attacks(graph):
-    num_nodes_to_remove = len(graph.nodes())
-    x_values_failures = []
-    x_values_page = []
-
-    y_values_failures = []
-    y_values_attack_out = []
-    y_values_attack_in = []
-    y_values_attack_pagerank = []
-    y_value_attack_betweenness = []
-
+    graph_copy_degree_in = graph.copy()
+    graph_copy_degree_out = graph.copy()
+    graph_copy_pagerank = graph.copy()
     graph_copy_failures = graph.copy()
+    graph_copy_betweenness = graph.copy()
+    graph_copy_hubs = graph.copy()
     
+    in_degree = nx.in_degree_centrality(graph_copy_degree_in)
+    sorted_in_degree = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
+
+    out_degree = nx.out_degree_centrality(graph_copy_degree_out)
+    sorted_out_degree = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
+    
+    betweenness = nx.betweenness_centrality(graph_copy_betweenness)
+    sorted_betweenness = sorted(betweenness.items(), key=lambda x: x[1], reverse=True)
+
+    pagerank = nx.pagerank(graph_copy_pagerank)
+    sorted_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)
+
+    hubs = nx.hits(graph)[0]
+    sorted_hubs = sorted(hubs.items(), key=lambda x: x[1], reverse=True)
+    
+    num_nodes_to_remove = len(graph.nodes())
+    
+    x_values_degree_in = []
+    y_values_degree_in = []
+
+    x_values_degree_out = []
+    y_values_degree_out = []
+    
+    x_values_betweenness = []
+    y_values_betweenness = []
+
+    x_values_pagerank = []
+    y_values_pagerank = []
+
+    x_values_hubs = []
+    y_values_hubs = []
+    
+    x_values_failures = []
+    y_values_failures = []
+
     for i in range(num_nodes_to_remove):
+        # In-degree attack
+        nodes_to_remove = [n[0] for n in sorted_in_degree[:i+1]]
+        graph_copy_degree_in.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy_degree_in), key=len) if graph_copy_degree_in else set()
+        x_values_degree_in.append(i+1)
+        y_values_degree_in.append(len(scc))
+
+        # Out-degree attack
+        nodes_to_remove = [n[0] for n in sorted_out_degree[:i+1]]
+        graph_copy_degree_out.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy_degree_out), key=len) if graph_copy_degree_out else set()
+        x_values_degree_out.append(i+1)
+        y_values_degree_out.append(len(scc))
+
+        # PageRank attack
+        nodes_to_remove = [n[0] for n in sorted_pagerank[:i+1]]
+        graph_copy_pagerank.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy_pagerank), key=len) if graph_copy_pagerank else set()
+        x_values_pagerank.append(i+1)
+        y_values_pagerank.append(len(scc))
+
+        # Betweenness attack
+        nodes_to_remove = [n[0] for n in sorted_betweenness[:i+1]]
+        graph_copy_betweenness.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy_betweenness), key=len) if graph_copy_betweenness else set()
+        x_values_betweenness.append(i+1)
+        y_values_betweenness.append(len(scc))
+
+        # Hubs attack
+        nodes_to_remove = [n[0] for n in sorted_hubs[:i+1]]
+        graph_copy_hubs.remove_nodes_from(nodes_to_remove)
+        scc = max(nx.strongly_connected_components(graph_copy_hubs), key=len) if graph_copy_hubs else set()
+        x_values_hubs.append(i+1)
+        y_values_hubs.append(len(scc))
+
         # Failures attack
         graph_copy_failures.remove_node(random.choice(list(graph_copy_failures.nodes())))
         scc = max(nx.strongly_connected_components(graph_copy_failures), key=len) if graph_copy_failures else set()
-        y_values_failures.append(len(scc))
         x_values_failures.append(i+1)
-        print(i)
-
-    for i in range(num_nodes_to_remove):
-        # Out degree attack
-        graph_copy = graph.copy()
-        out_degree = nx.out_degree_centrality(graph_copy)
-        sorted_out_degree = sorted(out_degree.items(), key=lambda x: x[1], reverse=True)
-        nodes_to_remove = [n[0] for n in sorted_out_degree[:i+1]]
-        graph_copy.remove_nodes_from(nodes_to_remove)
-        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
-        y_values_attack_out.append(len(scc))
-
-        # In degree attack
-        graph_copy = graph.copy()
-        in_degree = nx.in_degree_centrality(graph_copy)
-        sorted_in_degree = sorted(in_degree.items(), key=lambda x: x[1], reverse=True)
-        nodes_to_remove = [n[0] for n in sorted_in_degree[:i+1]]
-        graph_copy.remove_nodes_from(nodes_to_remove)
-        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
-        y_values_attack_in.append(len(scc))
-
-        # PageRank attack
-        graph_copy = graph.copy()
-        pagerank = nx.pagerank(graph_copy)
-        sorted_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)
-        nodes_to_remove = [n[0] for n in sorted_pagerank[:i+1]]
-        graph_copy.remove_nodes_from(nodes_to_remove)
-        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
-        y_values_attack_pagerank.append(len(scc))
-
-        # Betweenness attack
-        graph_copy = graph.copy()
-        betweenness = nx.betweenness_centrality(graph_copy)
-        sorted_betweenness = sorted(betweenness.items(), key=lambda x: x[1], reverse=True)
-        nodes_to_remove = [n[0] for n in sorted_betweenness[:i+1]]
-        graph_copy.remove_nodes_from(nodes_to_remove)
-        scc = max(nx.strongly_connected_components(graph_copy), key=len) if graph_copy else set()
-        y_value_attack_betweenness.append(len(scc))
-
-        x_values_page.append(i+1)
-
-    plt.plot(x_values_failures, y_values_failures, label='Random failure')
-    plt.plot(x_values_page, y_values_attack_out, label='Out degree attack')
-    plt.plot(x_values_page, y_values_attack_in, label='In degree attack')
-    plt.plot(x_values_page, y_values_attack_pagerank, label='PageRank attack')
-    plt.plot(x_values_page, y_value_attack_betweenness, label='Betweenness attack')
+        y_values_failures.append(len(scc))
+    
+    plt.plot(x_values_degree_in, y_values_degree_in, label='In degree attack')
+    plt.plot(x_values_degree_out, y_values_degree_out, label='Out degree attack')
+    plt.plot(x_values_betweenness, y_values_betweenness, label='Betweenness attack')
+    plt.plot(x_values_pagerank, y_values_pagerank, label='PageRank attack')
+    plt.plot(x_values_hubs, y_values_hubs, label='Hubs attack')
+    plt.plot(x_values_failures, y_values_failures, label='Failures attack')
+    
     plt.xlabel('Number of nodes removed')
     plt.ylabel('Size of largest strongly connected component')
     plt.legend()
