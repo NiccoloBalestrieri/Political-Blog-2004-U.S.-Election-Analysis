@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import random
 from igraph import Graph
 import csv
-
 from collections import Counter
 
 '''
@@ -142,23 +141,6 @@ def betweennessCentrality(graph):
     positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
     clr = ['purple', 'fuchsia', 'salmon', 'pink', 'pink']
     ax.bar(positions, top_5_dict.values(), width=0.5, color = clr)
-    # personalizzazione dell'asse x
-    ax.set_xticks(positions)
-    ax.set_xticklabels(top_5_dict.keys())
-    ax.tick_params(axis='x', which='both', length=0)
-    
-    plt.show()
-
-def closenessCentrality(graph):
-    closeness = nx.closeness_centrality(graph)
-    sorted_closeness = sorted(closeness.items(), key=lambda x: x[1], reverse=True)
-    top_5 = sorted_closeness[:5]
-    top_5_dict = {node: score for node, score in top_5}
-    # creazione del grafico a barre
-    fig, ax = plt.subplots()
-    plt.title("Closeness centrality")
-    positions = [1, 2, 3, 4, 5]  # posizioni sull'asse x
-    ax.bar(positions, top_5_dict.values(), width=0.5, color = 'green')
     # personalizzazione dell'asse x
     ax.set_xticks(positions)
     ax.set_xticklabels(top_5_dict.keys())
@@ -412,22 +394,6 @@ def autHub(graph):
     
     plt.show()
 
-def data():
-    # Dati del grafico
-    y = ['Net. Diameter', 'Avg. Path length', 'Avg. Clustering Coefficient', 'Graph Density', 'Efficieny']
-    x = [9, 3.390, 0.210, 0.013, 0.00018]
-    clr = ['red', 'blue', 'green', 'purple', 'yellow']
-    # Creazione del grafico
-    plt.barh(y, x, color=clr)
-    # Aggiunta di titolo e label degli assi
-    plt.title('Network properties')
-    plt.xlabel('Values')
-    plt.ylabel('Properties')
-
-    # Visualizzazione del grafico
-    plt.show()
-
-
 def plot_attacks(graph):
     graph_copy_degree_in = graph.copy()
     graph_copy_degree_out = graph.copy()
@@ -534,7 +500,7 @@ def global_efficieny(graph):
     efficiency /= len(graph.nodes())*(len(graph.nodes())-1)
     print("Efficiency:", efficiency)
 
-def closenness(graph):
+def closenessCentrality(graph):
     # Calculate the closeness centrality and closeness out centrality of each node
     closeness_centrality = nx.closeness_centrality(graph)
     G_reverse = graph.reverse()
@@ -580,46 +546,40 @@ def closenness(graph):
             writer.writerow([node, closeness_centrality[node], closeness_out_centrality[node]])
 
 def main():
-    edges = pd.read_csv("C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/edge_list.csv", sep = ";")
+    edges = pd.read_csv("./edge_list.csv", sep = ";")
     graph = nx.from_pandas_edgelist(edges, source = 'Source', target = 'Target', create_using=nx.DiGraph())
-    #global_efficieny(graph)
-    #data()
-    #closenness(graph)
-    #write_largest_connected_component(graph, 'C:/Users/nicco/OneDrive/Documenti/GitHub/Political-Blog-2004-U.S.-Election-Analysis/dataset/largest_component.csv')
-    #communities = defineCommunities(graph)
-    #mod = modularity(graph, communities)
-    #scc, wcc, n_scc, n_wcc = components(graph)
-    #InScaleFree(graph) #da rivedere
-    #OutScaleFree(graph) #da rivedere
-    #plotInDegreeDistribution(graph)
-    #plotOutDegreeDistribution(graph)
-    #plotInDegreeCumulativeDistribution(graph)
-    #plotOutDegreeCumulativeDistribution(graph)
-    #attackOutDegree(graph.copy())
-    #attackInDegree(graph.copy())
-    #attackPageRank(graph.copy())
-    #failures(graph.copy())
-    #drawCoreDecomposition(graph)
-    #linkPrediction(edges)
-    #autHub(graph)
-    plot_attacks(graph)
-    #pageRank(graph) #top 5 nodes
-    #degree_centrality = degreeCentrality(graph) #top 5 nodes
-    #betweennessCentrality(graph) #top 5 nodes
-    #outDegreeCentrality(graph) #top 5 nodes
-    #inDegreeCentrality(graph) #top 5 nodes
-    #closenessCentrality(graph) #top 5 nodes
-    #degree_centrality_str = ", ".join([str(node) for node in degree_centrality])
-    #assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
     
-    #print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
-    #print("Top 5 nodes degree centrality: " + degree_centrality_str)
-    #print(page_rank.values()) #capire perchè non va e perchè l'ho fatto
-    #print("Communities:", communities)
-    #print("Modularity:", mod)
-    #print("Dimension of the largest strongly connected component: " + str(len(scc)))
-    #print("Dimension of the largest weakly connected component: " + str(len(wcc)))
-    #print("Number of all the strongly connected components: " + str(n_scc))
-    #print("Number of all the weakly connected components:" + str(n_wcc))
+    global_efficieny(graph)
+    write_largest_connected_component(graph, './largest_component.csv')
+    plotInDegreeDistribution(graph)
+    plotOutDegreeDistribution(graph)
+    plotInDegreeCumulativeDistribution(graph)
+    plotOutDegreeCumulativeDistribution(graph)
+    drawCoreDecomposition(graph)
+    linkPrediction(edges)
+    autHub(graph)
+    plot_attacks(graph)
+    pageRank(graph) #top 5 nodes
+    betweennessCentrality(graph) #top 5 nodes
+    outDegreeCentrality(graph) #top 5 nodes
+    inDegreeCentrality(graph) #top 5 nodes
+    closenessCentrality(graph) #top 5 nodes
+    compute_k_core_decomposition(graph)
+
+    degree_centrality = degreeCentrality(graph) #top 5 nodes
+    degree_centrality_str = ", ".join([str(node) for node in degree_centrality])
+    assortativity_coefficient = nx.degree_assortativity_coefficient(graph) # Calculate the assortativity coefficient
+    communities = defineCommunities(graph)
+    mod = modularity(graph, communities)
+    scc, wcc, n_scc, n_wcc = components(graph)
+    
+    print("Assortativity coefficient: ", assortativity_coefficient) #Se postivo rete correlata, se negativo rete non correlata
+    print("Top 5 nodes degree centrality: " + degree_centrality_str)
+    print("Communities:", communities)
+    print("Modularity:", mod)
+    print("Dimension of the largest strongly connected component: " + str(len(scc)))
+    print("Dimension of the largest weakly connected component: " + str(len(wcc)))
+    print("Number of all the strongly connected components: " + str(n_scc))
+    print("Number of all the weakly connected components:" + str(n_wcc))
 
 main()
