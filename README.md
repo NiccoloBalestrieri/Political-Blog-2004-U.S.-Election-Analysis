@@ -1,7 +1,7 @@
 # Political-Blog-2004-U.S.-Election-Analysis
 Network analysis with gephi and networkX
 <p align="center"> 
-  <img src="presentation/presentationImage/logo.png" alt="Logo" width="80px" height="80px">
+  <img src="presentation/presentationImage/logo.png" alt="Logo" width="190px" height="190px">
 </p>
 <h1 align="center"> Graph Analysis: USA 2004 Elections </h1>
 <h3 align="center"> Degree course: Computer science and engineering </h3>
