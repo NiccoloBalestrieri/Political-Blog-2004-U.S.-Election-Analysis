@@ -8,7 +8,7 @@ Network analysis with gephi and networkX
 <h5 align="center"> Project Assignment - Complessità nei sistemi e nelle reti  - <a href="https://www.polimi.it/">Politecnico of Milan</a> (March 2023) </h5>
 
 <p align="center"> 
-  <img src="presentation/presentationImage/destraSinistra.png" alt="Network Image" height="282px" width="637">
+  <img src="presentation/presentationImage/destraSinistra.png" alt="Network Image" height="282px" width="337">
 </p>
 
 <!-- TABLE OF CONTENTS -->
