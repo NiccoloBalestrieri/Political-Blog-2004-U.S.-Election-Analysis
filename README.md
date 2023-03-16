@@ -75,33 +75,35 @@ The analysis start with an exploration of the overall structure of the graph, th
 <p align="center"> 
   <img src="presentation/presentationImage/randomLayout.png" alt="Random Layout Image" height="282px" width="337">
 </p>
-Looking at the network I discovered the following features: 
-- Conservative blogs show greater tendency to link 
-- 82% of conservative blogs linked to at least once 
-- 67% of liberal blogs are linked to at least once
-- Avg. links per blog is similar: 13.6 for liberal; 15.1 for conservative
-- 52% conservative blogs, 48% liberal blogs
-
+Looking at the network I discovered the following features:
+<ul>
+  <li> Conservative blogs show greater tendency to link. </li>
+  <li> 82% of conservative blogs linked to at least once. </li>
+  <li> 67% of liberal blogs are linked to at least once. </li>
+  <li> Avg. links per blog is similar: 13.6 for liberal; 15.1 for conservative. </li>
+  <li> 52% conservative blogs, 48% liberal blogs. </li>
+</ul>
 After that I calculated different measures because this could provide insights into the overall level of interconnectedness between conservative and liberal blogs, and whether there are any blogs that are particularly central or influential.
 
 Below are reported the most interesting ones:
-- In- Degree: The node with higher score is the 5, which is a liberal blog
-<p align="center"> 
-  <img src="presentation/presentationImage/inDegreeCirc.png" alt="In- Degree Image" height="282px" width="337">
-</p>
-- Out- Degree: The node with higher score is the 302, which is a conservative blog
-<p align="center"> 
-  <img src="presentation/presentationImage/outDegreeCirc.png" alt="Out- Degree Image" height="282px" width="337">
-</p>
-- Betweenness Centrality: The node with higher score is the 302, which is a conservative blog
-<p align="center"> 
-  <img src="presentation/presentationImage/betweennessCentralityCircular.png" alt="Betweenness centrality Image" height="282px" width="337">
-</p>
-- PageRank Centrality: The node with higher score is the 5, which is a liberal blog
-<p align="center"> 
-  <img src="presentation/presentationImage/pageRankCircl.png" alt="PageRank centrality Image" height="282px" width="337">
-</p>
-
+<ul>
+  <li><b>In- Degree:</b> The node with higher score is the 5, which is a liberal blog. </li>
+  <p align="center"> 
+    <img src="presentation/presentationImage/inDegreeCirc.png" alt="In- Degree Image" height="282px" width="337">
+  </p>
+  <li><b>Out- Degree:</b> The node with higher score is the 302, which is a conservative blog. </li>
+  <p align="center"> 
+    <img src="presentation/presentationImage/outDegreeCirc.png" alt="Out- Degree Image" height="282px" width="337">
+  </p>
+  <li><b>Betweenness Centrality:</b> The node with higher score is the 302, which is a conservative blog. </li>
+  <p align="center"> 
+    <img src="presentation/presentationImage/betweennessCentralityCircular.png" alt="Betweenness centrality Image" height="282px" width="337">
+  </p>
+  <li><b>PageRank Centrality:</b> The node with higher score is the 5, which is a liberal blog. </li>
+  <p align="center"> 
+    <img src="presentation/presentationImage/pageRankCircl.png" alt="PageRank centrality Image" height="282px" width="337">
+  </p> 
+</ul>
 Unfortunately, in the dataset there were only the Node Id but from these results it is easy to understand how these blogs were authoritative, respected sources and their key role in spreading ideas or influencing other blogs.
 
 Next, the analysis could focus on identifying any clusters or communities within the graph. These might represent groups of blogs that are more closely connected to each other than to blogs in other parts of the graph. The identification of such clusters could shed light on the degree of polarization between conservative and liberal blogs during the election, and whether there were any particular issues or events that were driving this polarization.
