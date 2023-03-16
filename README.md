@@ -20,10 +20,8 @@ Network analysis with gephi and networkX
     <li><a href="#about-the-project"> ➤ About The Project</a></li>
     <li><a href="#overview"> ➤ Overview</a></li>
     <li><a href="#project-files-description"> ➤ Project Files Description</a></li>
-    <li><a href="#getting-started"> ➤ Getting Started</a></li>
     <li><a href="#graph-analysis"> ➤ Graph analysis</a></li>
     <li><a href="#references"> ➤ References</a></li>
-    <li><a href="#credits"> ➤ Credits</a></li>
   </ol>
 </details>
 
@@ -71,26 +69,64 @@ Network analysis with gephi and networkX
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
-<!-- GETTING STARTED -->
-<h2 id="getting-started"> :book: Getting Started</h2>
+<!-- Analysis -->
+<h2 id="graph-analysis"> :small_orange_diamond: Graph analysis</h2>
+The analysis start with an exploration of the overall structure of the graph, the network is directed and unweighted and has 1224 nodes, 19025 edges.
+<p align="center"> 
+  <img src="presentation/presentationImage/randomLayout.png" alt="Random Layout Image" height="282px" width="337">
+</p>
+Looking at the network I discovered the following features: 
+*Conservative blogs show greater tendency to link 
+*82% of conservative blogs linked to at least once 
+*67% of liberal blogs are linked to at least once
+*Avg. links per blog is similar: 13.6 for liberal; 15.1 for conservative
+*52% conservative blogs, 48% liberal blogs
+![image](https://user-images.githubusercontent.com/92525345/225743310-9472d4f4-dac4-471e-a9e3-c5abcdd695a5.png)
 
-<p>You are able to start the game by typing the following commands in the command line:</p>
-<pre><code>$ python main.py</code></pre>
+After that I calculated different measures because this could provide insights into the overall level of interconnectedness between conservative and liberal blogs, and whether there are any blogs that are particularly central or influential.
+Below are reported the most interesting ones:
+*In- Degree: The node with higher score is the 5, which is a liberal blog
+<p align="center"> 
+  <img src="presentation/presentationImage/inDegreeCirc.png" alt="In- Degree Image" height="282px" width="337">
+</p>
+*Out- Degree: The node with higher score is the 302, which is a conservative blog
+<p align="center"> 
+  <img src="presentation/presentationImage/OutDegreeCirc.png" alt="Out- Degree Image" height="282px" width="337">
+</p>
+*Betweenness Centrality: The node with higher score is the 302, which is a conservative blog
+<p align="center"> 
+  <img src="presentation/presentationImage/betweennessCentralityCircular.png" alt="Betweenness centrality Image" height="282px" width="337">
+</p>
+*PageRank Centrality: The node with higher score is the 5, which is a liberal blog
+<p align="center"> 
+  <img src="presentation/presentationImage/pageRankCirc.png" alt="PageRank centrality Image" height="282px" width="337">
+</p>
 
-<p>You can see the list of all options and their default values via:</p>
-<pre><code>$ python main.py -h</code></pre>
+Unfortunately, in the dataset there were only the Node Id but from these results it is easy to understand how these blogs were authoritative, respected sources and their key role in spreading ideas or influencing other blogs.
+
+Next, the analysis could focus on identifying any clusters or communities within the graph. These might represent groups of blogs that are more closely connected to each other than to blogs in other parts of the graph. The identification of such clusters could shed light on the degree of polarization between conservative and liberal blogs during the election, and whether there were any particular issues or events that were driving this polarization.
+<p align="center"> 
+  <img src="presentation/presentationImage/communities.png" alt="Communities Image" height="282px" width="337">
+</p>
+From the image it is immediately clear that there are two main communities (green and purple), which I have assumed to be the liberal and conservative blogging communities; to do this I implemented Louvain's algorithm and visualized the resulting graph with gephi.
+
+In conclusion, with the help of the cumulative degree distribution and robustness plots:
+<table><tr>
+<td><img src="presentation/presentationImage/inDegreeCumulatedDistribution.png" alt="In- Degree Cumulated Distribution Image"></td>
+<td><img src="presentation/presentationImage/ensemble.png" alt="Robustness Image"></td>
+</tr></table>
+I considereted the network as a scale free net.
+
+
+
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 <!-- Analysis -->
-<h2 id="graph-analysis"> :small_orange_diamond: Scenario 1: Finding a Fixed Food Dot using Depth First Search</h2>
+<h2 id="references"> :small_orange_diamond: References</h2>
 
-</p>
-
-
-
-
-
+[1]	Jérôme Kunegis. KONECT – The Koblenz Network Collection. In Proc. Int. Conf. on World Wide Web Companion, pages 1343–1350, 2013.
+[2]	Lada A. Adamic and Natalie Glance. The political blogosphere and the 2004 US election: Divided they blog. In Proc. Int. Workshop on Link Discov., pages 36–43, 2005.
 
 
 
