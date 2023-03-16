@@ -76,28 +76,28 @@ The analysis start with an exploration of the overall structure of the graph, th
   <img src="presentation/presentationImage/randomLayout.png" alt="Random Layout Image" height="282px" width="337">
 </p>
 Looking at the network I discovered the following features: 
-*Conservative blogs show greater tendency to link 
-*82% of conservative blogs linked to at least once 
-*67% of liberal blogs are linked to at least once
-*Avg. links per blog is similar: 13.6 for liberal; 15.1 for conservative
-*52% conservative blogs, 48% liberal blogs
+* Conservative blogs show greater tendency to link 
+* 82% of conservative blogs linked to at least once 
+* 67% of liberal blogs are linked to at least once
+* Avg. links per blog is similar: 13.6 for liberal; 15.1 for conservative
+* 52% conservative blogs, 48% liberal blogs
 
 After that I calculated different measures because this could provide insights into the overall level of interconnectedness between conservative and liberal blogs, and whether there are any blogs that are particularly central or influential.
 
 Below are reported the most interesting ones:
-*In- Degree: The node with higher score is the 5, which is a liberal blog
+* In- Degree: The node with higher score is the 5, which is a liberal blog
 <p align="center"> 
   <img src="presentation/presentationImage/inDegreeCirc.png" alt="In- Degree Image" height="282px" width="337">
 </p>
-*Out- Degree: The node with higher score is the 302, which is a conservative blog
+* Out- Degree: The node with higher score is the 302, which is a conservative blog
 <p align="center"> 
   <img src="presentation/presentationImage/outDegreeCirc.png" alt="Out- Degree Image" height="282px" width="337">
 </p>
-*Betweenness Centrality: The node with higher score is the 302, which is a conservative blog
+* Betweenness Centrality: The node with higher score is the 302, which is a conservative blog
 <p align="center"> 
   <img src="presentation/presentationImage/betweennessCentralityCircular.png" alt="Betweenness centrality Image" height="282px" width="337">
 </p>
-*PageRank Centrality: The node with higher score is the 5, which is a liberal blog
+* PageRank Centrality: The node with higher score is the 5, which is a liberal blog
 <p align="center"> 
   <img src="presentation/presentationImage/pageRankCircl.png" alt="PageRank centrality Image" height="282px" width="337">
 </p>
@@ -116,10 +116,12 @@ In conclusion, with the help of the cumulative degree distribution and robustnes
 <td><img src="presentation/presentationImage/ensemble.png" alt="Robustness Image"></td>
 </tr></table>
 I considereted the network as a scale free net.
+
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 <!-- Analysis -->
 <h2 id="references"> :small_orange_diamond: References</h2>
+
 [1]	Jérôme Kunegis. KONECT – The Koblenz Network Collection. In Proc. Int. Conf. on World Wide Web Companion, pages 1343–1350, 2013.
 [2]	Lada A. Adamic and Natalie Glance. The political blogosphere and the 2004 US election: Divided they blog. In Proc. Int. Workshop on Link Discov., pages 36–43, 2005.
 
