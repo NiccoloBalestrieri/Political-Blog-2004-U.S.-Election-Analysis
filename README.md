@@ -81,9 +81,9 @@ Looking at the network I discovered the following features:
 *67% of liberal blogs are linked to at least once
 *Avg. links per blog is similar: 13.6 for liberal; 15.1 for conservative
 *52% conservative blogs, 48% liberal blogs
-![image](https://user-images.githubusercontent.com/92525345/225743310-9472d4f4-dac4-471e-a9e3-c5abcdd695a5.png)
 
 After that I calculated different measures because this could provide insights into the overall level of interconnectedness between conservative and liberal blogs, and whether there are any blogs that are particularly central or influential.
+
 Below are reported the most interesting ones:
 *In- Degree: The node with higher score is the 5, which is a liberal blog
 <p align="center"> 
@@ -91,7 +91,7 @@ Below are reported the most interesting ones:
 </p>
 *Out- Degree: The node with higher score is the 302, which is a conservative blog
 <p align="center"> 
-  <img src="presentation/presentationImage/OutDegreeCirc.png" alt="Out- Degree Image" height="282px" width="337">
+  <img src="presentation/presentationImage/outDegreeCirc.png" alt="Out- Degree Image" height="282px" width="337">
 </p>
 *Betweenness Centrality: The node with higher score is the 302, which is a conservative blog
 <p align="center"> 
@@ -99,7 +99,7 @@ Below are reported the most interesting ones:
 </p>
 *PageRank Centrality: The node with higher score is the 5, which is a liberal blog
 <p align="center"> 
-  <img src="presentation/presentationImage/pageRankCirc.png" alt="PageRank centrality Image" height="282px" width="337">
+  <img src="presentation/presentationImage/pageRankCircl.png" alt="PageRank centrality Image" height="282px" width="337">
 </p>
 
 Unfortunately, in the dataset there were only the Node Id but from these results it is easy to understand how these blogs were authoritative, respected sources and their key role in spreading ideas or influencing other blogs.
@@ -116,15 +116,10 @@ In conclusion, with the help of the cumulative degree distribution and robustnes
 <td><img src="presentation/presentationImage/ensemble.png" alt="Robustness Image"></td>
 </tr></table>
 I considereted the network as a scale free net.
-
-
-
-
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 <!-- Analysis -->
 <h2 id="references"> :small_orange_diamond: References</h2>
-
 [1]	Jérôme Kunegis. KONECT – The Koblenz Network Collection. In Proc. Int. Conf. on World Wide Web Companion, pages 1343–1350, 2013.
 [2]	Lada A. Adamic and Natalie Glance. The political blogosphere and the 2004 US election: Divided they blog. In Proc. Int. Workshop on Link Discov., pages 36–43, 2005.
 
